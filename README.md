@@ -20,7 +20,7 @@ Open index.html in a browser, or serve this folder with any static server.
 - Connect audit form to email, CRM, or lead intake backend.
 - Select phone/SMS provider and connect missed-call trigger.
 - Add real business contact details, terms, privacy policy, and tracking pixels before paid traffic.
-- Replace local browser storage with backend lead capture before public launch.
+- Audit form is wired to the Cloudflare Worker intake API. Email/CRM notification is the next backend upgrade.
 
 ## First Test
 

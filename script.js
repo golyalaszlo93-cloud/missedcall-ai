@@ -33,6 +33,7 @@ const demos = {
     ]
   }
 };
+const AUDIT_API_URL = "https://missedcall-ai-intake.golyalaszlo93.workers.dev/audit-request";
 const thread = document.querySelector(".thread");
 const summaryTitle = document.querySelector("#summaryTitle");
 const summaryMeta = document.querySelector("#summaryMeta");
@@ -57,16 +58,36 @@ tabs.forEach((tab) => {
   });
 });
 renderDemo("limo");
-document.querySelector(".audit-form").addEventListener("submit", (event) => {
+document.querySelector(".audit-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
-  const data = Object.fromEntries(new FormData(form).entries());
-  const submissions = JSON.parse(localStorage.getItem("missedCallAuditRequests") || "[]");
-  submissions.push({ ...data, submittedAt: new Date().toISOString() });
-  localStorage.setItem("missedCallAuditRequests", JSON.stringify(submissions));
-  form.reset();
+  const button = form.querySelector("button[type='submit']");
   const note = form.querySelector(".form-note");
-  note.textContent = "Audit request saved locally for demo. Connect CRM/email before live launch.";
+  const data = Object.fromEntries(new FormData(form).entries());
+  button.disabled = true;
+  button.textContent = "Sending...";
+  note.textContent = "Sending audit request...";
+  try {
+    const response = await fetch(AUDIT_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, source: "missedcall-ai-github-pages" })
+    });
+    const result = await response.json();
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "request_failed");
+    }
+    form.reset();
+    note.textContent = "Audit request received. We will review the lead flow and follow up with next steps.";
+  } catch (error) {
+    const submissions = JSON.parse(localStorage.getItem("missedCallAuditRequests") || "[]");
+    submissions.push({ ...data, submittedAt: new Date().toISOString(), syncStatus: "pending" });
+    localStorage.setItem("missedCallAuditRequests", JSON.stringify(submissions));
+    note.textContent = "Connection issue. Saved locally as backup; retry or connect CRM/email if this persists.";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Request free audit";
+  }
 });
 
 const scoreInputs = document.querySelectorAll("[data-score]");
