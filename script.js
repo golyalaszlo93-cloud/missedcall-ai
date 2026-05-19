@@ -68,3 +68,25 @@ document.querySelector(".audit-form").addEventListener("submit", (event) => {
   const note = form.querySelector(".form-note");
   note.textContent = "Audit request saved locally for demo. Connect CRM/email before live launch.";
 });
+
+const scoreInputs = document.querySelectorAll("[data-score]");
+const leadScore = document.querySelector("#leadScore");
+const leadRating = document.querySelector("#leadRating");
+
+function updateLeadScore() {
+  const score = Array.from(scoreInputs).reduce((total, input) => {
+    return total + (input.checked ? Number(input.dataset.score) : 0);
+  }, 15);
+  const bounded = Math.max(0, Math.min(100, score));
+  leadScore.textContent = bounded;
+  if (bounded >= 85) {
+    leadRating.textContent = "Hot lead - alert owner now";
+  } else if (bounded >= 60) {
+    leadRating.textContent = "Warm lead - follow up fast";
+  } else {
+    leadRating.textContent = "Cold lead - keep in nurture";
+  }
+}
+
+scoreInputs.forEach((input) => input.addEventListener("change", updateLeadScore));
+updateLeadScore();
